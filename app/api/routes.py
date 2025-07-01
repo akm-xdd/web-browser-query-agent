@@ -57,25 +57,29 @@ async def process_query(request: QueryRequest):
                 query=request.query
             )
         
-        # Step 2: Check similarity
-        found_similar, similar_query, similarity_score, cached_result = await similarity_checker.check_similarity(request.query)
+        # Step 2: Check similarity (only if force_refresh is False)
+        if not request.force_refresh:
+            found_similar, similar_query, similarity_score, cached_result = await similarity_checker.check_similarity(request.query)
+            
+            if found_similar:
+                print(f"Found similar cached query: {similar_query} (similarity: {similarity_score:.3f})")
+                return ProcessQueryResponse(
+                    is_valid=True,
+                    validation_message=validation_message,
+                    found_similar=True,
+                    similar_query=similar_query,
+                    similarity_score=similarity_score,
+                    result=cached_result,
+                    query=request.query
+                )
+        else:
+            print(f"Skipping cache check due to force_refresh=True for query: {request.query}")
         
-        if found_similar:
-            return ProcessQueryResponse(
-                is_valid=True,
-                validation_message=validation_message,
-                found_similar=True,
-                similar_query=similar_query,
-                similarity_score=similarity_score,
-                result=cached_result,
-                query=request.query
-            )
-        
-        # Step 3: New query - scrape web and summarize
-        print(f"Processing new query: {request.query}")
+        # Step 3: New query or force refresh - scrape web and summarize
+        print(f"Processing {'fresh' if request.force_refresh else 'new'} query: {request.query}")
         result = await web_scraper.scrape_and_summarize(request.query)
         
-        # Cache this result for future queries
+        # Cache this result for future queries (always cache, even for force_refresh)
         similarity_checker.cache_query_result(request.query, result)
         
         return ProcessQueryResponse(
@@ -97,7 +101,6 @@ async def get_cache_stats():
 async def clear_cache():
     query_cache.clear_cache()
     return {"message": "Cache cleared successfully"}
-
 
 @router.post("/cleanup-cache")
 async def cleanup_cache(max_entries: int = 50):
