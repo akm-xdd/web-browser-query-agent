@@ -1,0 +1,36 @@
+# Use official Playwright image but optimize it
+FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
+
+# Install minimal additional dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Set working directory
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements-playwright.txt .
+RUN pip install --no-cache-dir -r requirements-playwright.txt
+
+# Copy scraper script
+COPY scraper/ ./scraper/
+
+# Remove unnecessary browsers (keep only Chromium)
+RUN rm -rf /ms/playwright/firefox* /ms/playwright/webkit* || true
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app && \
+    chown -R app:app /app
+USER app
+
+# Expose port
+EXPOSE 8001
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# Command to run the scraper service
+CMD ["python", "scraper/main.py"]
