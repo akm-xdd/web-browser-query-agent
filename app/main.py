@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+# Remove this line: from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
 from app.core.config import settings
 
@@ -9,19 +9,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Add CORS middleware - THIS IS KEY
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://localhost:5173", 
-        "https://ripplica.vercel.app",
-        "https://ripplica.vercel.app/",
-    ],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-)
+# REMOVE ALL THE CORS MIDDLEWARE CODE
+# Don't add any app.add_middleware(CORSMiddleware, ...)
 
 # Include API routes
 app.include_router(router, prefix="/api/v1")
