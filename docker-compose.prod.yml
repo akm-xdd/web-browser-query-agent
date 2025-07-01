@@ -1,0 +1,42 @@
+# docker-compose.prod.yml
+version: '3.8'
+
+services:
+  main-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.main
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  web-scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+    ports:
+      - "127.0.0.1:8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
