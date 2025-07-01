@@ -9,8 +9,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# REMOVE ALL THE CORS MIDDLEWARE CODE
-# Don't add any app.add_middleware(CORSMiddleware, ...)
 
 # Include API routes
 app.include_router(router, prefix="/api/v1")

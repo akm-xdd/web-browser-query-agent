@@ -8,10 +8,10 @@ import time
 class WebScraper:
     def __init__(self):
         self.max_results = 5
-        self.search_timeout = 30000  # Keep original timeout for search
-        self.page_timeout = 30000    # Increased timeout for page loading
+        self.search_timeout = 30000
+        self.page_timeout = 30000
         self.retry_count = 1         
-        self.max_concurrent_scrapes = 3  # Limit concurrent scraping
+        self.max_concurrent_scrapes = 3 
     
     async def search_duckduckgo(self, query: str) -> List[Dict[str, str]]:
         """Search DuckDuckGo and return top results (fallback)"""

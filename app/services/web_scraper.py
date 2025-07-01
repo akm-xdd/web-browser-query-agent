@@ -119,14 +119,14 @@ class WebScraperClient:
     def _create_fallback_summary(self, results: List[Dict]) -> str:
         """Create a simple fallback summary without AI when summarization fails"""
         summary_parts = []
-        for i, result in enumerate(results[:5], 1):  # Show all 5 results
+        for i, result in enumerate(results[:5], 1):
             title = result.get('title', 'No title')
             snippet = result.get('snippet', '')
             url = result.get('url', '')
             
             summary_parts.append(f"{i}. {title}")
             if snippet:
-                summary_parts.append(f"   {snippet[:200]}...")  # Show more snippet text
+                summary_parts.append(f"   {snippet[:200]}...") 
             summary_parts.append(f"   Source: {url}")
             summary_parts.append("")
         
